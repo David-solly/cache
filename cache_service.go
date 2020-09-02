@@ -56,4 +56,5 @@ type Service interface {
 	StoreRecord(model Record) (bool, error)
 	StoreExpiringRecord(model Expirer) (bool, error)
 	ReadCache(key string) (string, bool, error)
+	DeleteFromCache(key string) (bool, error)
 }

@@ -61,10 +61,15 @@ func (c *MemoryCache) StoreExpiringRecord(model Expirer) (bool, error) {
 	c.client.mutex.Unlock()
 	go func(k string, duration time.Duration, c *MemoryCache) {
 		time.Sleep(duration)
-		c.client.mutex.Lock()
-		delete(c.client.data, k)
-		c.client.mutex.Unlock()
+		c.DeleteFromCache(k)
 		return
 	}(k, t, c)
+	return true, nil
+}
+
+func (c *MemoryCache) DeleteFromCache(key string) (bool, error) {
+	c.client.mutex.Lock()
+	delete(c.client.data, strings.ToUpper(key))
+	c.client.mutex.Unlock()
 	return true, nil
 }

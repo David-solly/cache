@@ -71,3 +71,13 @@ func (c *RedisCache) ReadCache(key string) (string, bool, error) {
 	}
 	return data, true, nil
 }
+
+func (c *RedisCache) DeleteFromCache(key string) (bool, error) {
+	base := c.client.Del(strings.ToUpper(key))
+	err := base.Err()
+	if err != nil {
+		return false, fmt.Errorf("Error deleteing value at @ key: '%q'", key)
+	}
+
+	return true, nil
+}

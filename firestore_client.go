@@ -98,3 +98,13 @@ func (c *FirestoreCache) ReadCache(key string) (string, bool, error) {
 	fmt.Printf("Document data: %#v\n", m)
 	return m[c.ValueKey].(string), data.Exists(), nil
 }
+
+func (c *FirestoreCache) DeleteFromCache(key string) (bool, error) {
+	_, err := c.client.Collection(c.CollectionName).Doc(strings.ToUpper(key)).Delete(context.Background())
+	if err != nil {
+		// Handle any errors in an appropriate way, such as returning them.
+		log.Printf("An error has occurred: %s", err)
+		return false, fmt.Errorf("Failed to delete %q: - due to error :%v", key, err)
+	}
+	return true, nil
+}
