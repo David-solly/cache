@@ -238,6 +238,7 @@ func TestCache5chars(t *testing.T) {
 				{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38241"}, true, rCache, ""},
 				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, mCache, "Value @ key: '\"38225\"' - Not Found"},
 				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, rCache, "Value @ key: '\"38225\"' - Not Found"},
+				{"CACHE - firestore", Record{Value: "FFA45722AA7", Key: "38212"}, true, fCache, ""},
 			}
 
 			for i, test := range suite {

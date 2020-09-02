@@ -15,7 +15,9 @@ import (
 )
 
 type FirestoreCache struct {
-	client *storage.Client
+	client         *storage.Client
+	CollectionName string
+	ValueKey       string
 }
 
 // Init : redis
@@ -45,7 +47,9 @@ func (c *FirestoreCache) init() (string, error) {
 		c.client = nil
 		return "", err
 	}
-	// defer c.client.Close()
+
+	c.CollectionName = "license-keys"
+	c.ValueKey = "value"
 
 	fmt.Println("Firestore - Online ..........")
 	return "PONG", nil
@@ -61,8 +65,7 @@ func (c *FirestoreCache) StoreRecord(model Record) (bool, error) {
 		return false, errors.New("Firebase client is nil")
 	}
 	ctx := context.Background()
-	_, _, err := c.client.Collection("license-keys").Add(ctx, map[string]interface{}{
-		"key":   strings.ToUpper(model.Key),
+	_, err := c.client.Collection(c.CollectionName).Doc(strings.ToUpper(model.Key)).Set(ctx, map[string]interface{}{
 		"value": strings.ToUpper(model.Value),
 	})
 	if err != nil {
@@ -83,14 +86,15 @@ func (c *FirestoreCache) StoreExpiringRecord(model Expirer) (bool, error) {
 	// if errAccess != nil {
 	// 	return false, errAccess
 	// }
-	return true, nil
+	return false, nil
 }
 
 func (c *FirestoreCache) ReadCache(key string) (string, bool, error) {
-	// data, err := c.client.Get(strings.ToUpper(key)).Result()
-
-	// if err != nil {
-	// 	return "", false, fmt.Errorf("Value @ key: '%q' - Not Found", key)
-	// }
-	return "{data retrieved}", true, nil
+	data, err := c.client.Collection(c.CollectionName).Doc(strings.ToUpper(key)).Get(context.Background())
+	if err != nil {
+		return "", false, fmt.Errorf("Value @ key: '%q' - Not Found", key)
+	}
+	m := data.Data()
+	fmt.Printf("Document data: %#v\n", m)
+	return m[c.ValueKey].(string), data.Exists(), nil
 }
