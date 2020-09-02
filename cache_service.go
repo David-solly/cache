@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"errors"
 	"os"
 	"strings"
 )
@@ -15,7 +14,16 @@ type Cache struct {
 func (c *Cache) Initialise(redisAddr string, use bool) (bool, error) {
 	if use {
 		if addr := strings.Trim(redisAddr, " "); addr == "" {
-			return false, errors.New("No address supllied")
+			c.Client = &FirestoreCache{}
+
+			pong, err := c.Client.Initialise()
+			if err != nil {
+				return false, err
+			}
+			if pong == "PONG" {
+				return true, nil
+
+			}
 		}
 		os.Setenv("REDIS_DSN", redisAddr)
 		c.Client = &RedisCache{}

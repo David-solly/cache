@@ -28,7 +28,7 @@ func TestInitialiseCache(t *testing.T) {
 			{"INITIALISE - redis", globalRedis, true, true, &RedisCache{}, ""},
 			{"INITIALISE - redis", "192.168.99.100:6349", true, false, &RedisCache{}, "No connection"},
 			{"INITIALISE - redis", globalRedis, false, true, &MemoryCache{}, ""},
-			{"INITIALISE - none", "", true, false, nil, "No address supllied"},
+			{"INITIALISE - firestore", "", true, true, &FirestoreCache{}, ""},
 			{"INITIALISE - memory", "", false, true, &MemoryCache{}, ""},
 		}
 		for i, test := range suite {
@@ -190,6 +190,9 @@ func TestCache5chars(t *testing.T) {
 	mCache := Cache{}
 	mCache.Initialise("", false)
 
+	fCache := Cache{}
+	fCache.Initialise("", true)
+
 	rCache := Cache{}
 	// Redis endpoint - true flag to confirm redis as choice
 	rCache.Initialise(globalRedis, useRedis)
@@ -207,6 +210,7 @@ func TestCache5chars(t *testing.T) {
 			{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38251"}, false, Cache{Client: &RedisCache{}}, ""},
 			{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38242"}, true, mCache, ""},
 			{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38212"}, true, mCache, ""},
+			{"CACHE - firestore", Record{Value: "FFA45722AA7", Key: "38212"}, true, fCache, ""},
 		}
 
 		for i, test := range suite {
