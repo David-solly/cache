@@ -86,7 +86,7 @@ func (c *FirestoreCache) StoreExpiringRecord(model Expirer) (bool, error) {
 	// if errAccess != nil {
 	// 	return false, errAccess
 	// }
-	return false, nil
+	return false, errors.New("Function Not Implimented For Firestore")
 }
 
 func (c *FirestoreCache) ReadCache(key string) (string, bool, error) {
