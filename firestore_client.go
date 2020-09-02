@@ -61,13 +61,19 @@ func (c *FirestoreCache) Initialise() (string, error) {
 }
 
 func (c *FirestoreCache) StoreRecord(model Record) (bool, error) {
+	var err error
 	if c.client == nil {
 		return false, errors.New("Firebase client is nil")
 	}
 	ctx := context.Background()
-	_, err := c.client.Collection(c.CollectionName).Doc(strings.ToUpper(model.Key)).Set(ctx, map[string]interface{}{
-		"value": strings.ToUpper(model.Value),
-	})
+
+	if model.Value != "" {
+		_, err = c.client.Collection(c.CollectionName).Doc(strings.ToUpper(model.Key)).Set(ctx, map[string]interface{}{
+			c.ValueKey: strings.ToUpper(model.Value),
+		})
+	} else {
+		_, err = c.client.Collection(c.CollectionName).Doc(strings.ToUpper(model.Key)).Set(ctx, model.ValueMap)
+	}
 	if err != nil {
 		return false, fmt.Errorf("Failed adding record:%q with error: %v", model.Key, err)
 	}
@@ -89,14 +95,14 @@ func (c *FirestoreCache) StoreExpiringRecord(model Expirer) (bool, error) {
 	return false, errors.New("Function Not Implimented For Firestore")
 }
 
-func (c *FirestoreCache) ReadCache(key string) (string, bool, error) {
+func (c *FirestoreCache) ReadCache(key string) (interface{}, bool, error) {
 	data, err := c.client.Collection(c.CollectionName).Doc(strings.ToUpper(key)).Get(context.Background())
 	if err != nil {
 		return "", false, fmt.Errorf("Value @ key: '%q' - Not Found", key)
 	}
 	m := data.Data()
 	fmt.Printf("Document data: %#v\n", m)
-	return m[c.ValueKey].(string), data.Exists(), nil
+	return m, data.Exists(), nil
 }
 
 func (c *FirestoreCache) DeleteFromCache(key string) (bool, error) {

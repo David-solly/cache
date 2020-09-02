@@ -63,7 +63,7 @@ func (c *RedisCache) StoreExpiringRecord(model Expirer) (bool, error) {
 	return true, nil
 }
 
-func (c *RedisCache) ReadCache(key string) (string, bool, error) {
+func (c *RedisCache) ReadCache(key string) (interface{}, bool, error) {
 	data, err := c.client.Get(strings.ToUpper(key)).Result()
 
 	if err != nil {

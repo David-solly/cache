@@ -238,7 +238,7 @@ func TestCache5chars(t *testing.T) {
 				{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38241"}, true, rCache, ""},
 				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, mCache, "Value @ key: '\"38225\"' - Not Found"},
 				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, rCache, "Value @ key: '\"38225\"' - Not Found"},
-				{"CACHE - firestore", Record{Value: "FFA45722AA7", Key: "38212"}, true, fCache, ""},
+				{"CACHE - firestore", Record{ValueMap: map[string]interface{}{"value": "FFA45722AA7"}, Key: "38212"}, true, fCache, ""},
 			}
 
 			for i, test := range suite {
@@ -246,14 +246,26 @@ func TestCache5chars(t *testing.T) {
 				t.Run(fmt.Sprintf("#%d - READ CACHE: %q", i, test.data.Key), func(t *testing.T) {
 					device, found, err := test.cache.Client.ReadCache(test.data.Key)
 					assert.Equal(t, found, test.expect)
-					assert.Equal(t, reflect.TypeOf(device), reflect.TypeOf("deveui"))
+					if test.testName == "CACHE - firestore" {
+						assert.Equal(t, reflect.TypeOf(device), reflect.TypeOf(map[string]interface{}{}))
+					} else {
+						assert.Equal(t, reflect.TypeOf(device), reflect.TypeOf("deveui"))
+					}
 					if test.expect {
 						assert.NilError(t, err)
-						assert.Equal(t, device, test.data.Value)
+						if test.testName == "CACHE - firestore" {
+							assert.DeepEqual(t, device, test.data.ValueMap)
+						} else {
+							assert.Equal(t, device, test.data.Value)
+						}
 					}
 					if !test.expect {
 						assert.Error(t, err, test.err)
-						assert.Equal(t, device, "")
+						if test.testName == "CACHE - firestore" {
+							assert.Equal(t, device, nil)
+						} else {
+							assert.Equal(t, device, "")
+						}
 
 					}
 

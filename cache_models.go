@@ -4,8 +4,9 @@ import "time"
 
 //Create type
 type Record struct {
-	Key   string `json:"deveui,omitempty"`
-	Value string `json:"shortcode,omitempty"`
+	Key      string                 `json:"key,omitempty"`
+	Value    string                 `json:"val,omitempty"`
+	ValueMap map[string]interface{} `json:"values,omitempty"`
 }
 
 type RecordExpirer struct {

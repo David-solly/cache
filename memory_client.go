@@ -41,7 +41,7 @@ func (c *MemoryCache) StoreRecord(model Record) (bool, error) {
 	return true, nil
 }
 
-func (c *MemoryCache) ReadCache(key string) (string, bool, error) {
+func (c *MemoryCache) ReadCache(key string) (interface{}, bool, error) {
 	c.client.mutex.Lock()
 	data, k := c.client.data[strings.ToUpper(key)]
 	c.client.mutex.Unlock()
