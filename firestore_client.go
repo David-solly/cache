@@ -28,8 +28,9 @@ func (c *FirestoreCache) init() (string, error) {
 
 	// From Deployment or environmental variables
 	projectID := os.Getenv("FIRESTORE_PROJECT_ID")
-	if len(projectID) == 0 {
-		dsn := option.WithCredentialsFile("./.ac-plugin-k.json")
+	keyPath := os.Getenv("FIRESTORE_KEY_PATH")
+	if len(keyPath) != 0 {
+		dsn := option.WithCredentialsFile(keyPath)
 		app, err = firebase.NewApp(ctx, nil, dsn)
 	} else {
 		conf := &firebase.Config{ProjectID: projectID}
