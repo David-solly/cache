@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -209,7 +210,7 @@ func TestCache5chars(t *testing.T) {
 			{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38241"}, true, rCache, ""},
 			{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38251"}, false, Cache{Client: &RedisCache{}}, ""},
 			{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38242"}, true, mCache, ""},
-			{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38212"}, true, mCache, ""},
+			{"CACHE - memory", Record{ValueMap: map[string]interface{}{"id": "FFA45722AA7"}, Key: "38212"}, true, mCache, ""},
 			{"CACHE - firestore", Record{Value: "FFA45722AA7", Key: "38212"}, true, fCache, ""},
 		}
 
@@ -237,8 +238,8 @@ func TestCache5chars(t *testing.T) {
 				{"CACHE - memory ", Record{Value: "FFA45722AA7", Key: "38240"}, true, mCache, ""},
 				{"CACHE - redis", Record{Value: "FFA45722AA7", Key: "38241"}, true, rCache, ""},
 				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, mCache, "Value @ key: '\"38225\"' - Not Found"},
-				{"CACHE - memory", Record{Value: "FFA45722AA7", Key: "38225"}, false, rCache, "Value @ key: '\"38225\"' - Not Found"},
-				{"CACHE - firestore", Record{ValueMap: map[string]interface{}{"value": "FFA45722AA7"}, Key: "38212"}, true, fCache, ""},
+				{"CACHE - firestore - map", Record{ValueMap: map[string]interface{}{"value": "FFA45722AA7"}, Key: "38212"}, true, fCache, ""},
+				{"CACHE - memory - map", Record{ValueMap: map[string]interface{}{"id": "FFA45722AA7"}, Key: "38212"}, true, mCache, ""},
 			}
 
 			for i, test := range suite {
@@ -246,14 +247,14 @@ func TestCache5chars(t *testing.T) {
 				t.Run(fmt.Sprintf("#%d - READ CACHE: %q", i, test.data.Key), func(t *testing.T) {
 					device, found, err := test.cache.Client.ReadCache(test.data.Key)
 					assert.Equal(t, found, test.expect)
-					if test.testName == "CACHE - firestore" {
+					if strings.Contains(test.testName, "- map") {
 						assert.Equal(t, reflect.TypeOf(device), reflect.TypeOf(map[string]interface{}{}))
 					} else {
 						assert.Equal(t, reflect.TypeOf(device), reflect.TypeOf("deveui"))
 					}
 					if test.expect {
 						assert.NilError(t, err)
-						if test.testName == "CACHE - firestore" {
+						if strings.Contains(test.testName, "- map") {
 							assert.DeepEqual(t, device, test.data.ValueMap)
 						} else {
 							assert.Equal(t, device, test.data.Value)
@@ -261,7 +262,7 @@ func TestCache5chars(t *testing.T) {
 					}
 					if !test.expect {
 						assert.Error(t, err, test.err)
-						if test.testName == "CACHE - firestore" {
+						if strings.Contains(test.testName, "- map") {
 							assert.Equal(t, device, nil)
 						} else {
 							assert.Equal(t, device, "")
