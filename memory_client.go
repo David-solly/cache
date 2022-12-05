@@ -13,13 +13,13 @@ type MemoryCache struct {
 
 type Store struct {
 	name  string
-	data  map[string]string
+	data  map[string]interface{}
 	mutex sync.Mutex
 }
 
 func (c MemoryCache) NewClient() *Store {
 	return &Store{name: "Memory store",
-		data: map[string]string{"PING": "PONG"}}
+		data: map[string]interface{}{"PING": "PONG"}}
 }
 
 func (c *MemoryCache) init() (string, error) {
@@ -27,7 +27,7 @@ func (c *MemoryCache) init() (string, error) {
 	pong, _ := c.client.data["PING"]
 
 	fmt.Println("Memory store - Online ..........")
-	return pong, nil
+	return pong.(string), nil
 }
 
 func (c *MemoryCache) Initialise() (string, error) {
@@ -36,7 +36,11 @@ func (c *MemoryCache) Initialise() (string, error) {
 
 func (c *MemoryCache) StoreRecord(model Record) (bool, error) {
 	c.client.mutex.Lock()
-	c.client.data[strings.ToUpper(model.Key)] = strings.ToUpper(model.Value)
+	if model.ValueMap != nil {
+		c.client.data[strings.ToUpper(model.Key)] = model.ValueMap
+	} else {
+		c.client.data[strings.ToUpper(model.Key)] = strings.ToUpper(model.Value)
+	}
 	c.client.mutex.Unlock()
 	return true, nil
 }
