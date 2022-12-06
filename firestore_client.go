@@ -102,7 +102,6 @@ func (c *FirestoreCache) ReadCache(key string) (interface{}, bool, error) {
 		return "", false, fmt.Errorf("Value @ key: '%q' - Not Found", key)
 	}
 	m := data.Data()
-	fmt.Printf("Document data: %#v\n", m)
 	return m, data.Exists(), nil
 }
 
